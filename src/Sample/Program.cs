@@ -26,7 +26,8 @@ var kernel = new KernelBuilder()
 
 var transcriptPlugin = kernel.ImportSkill(
     new TranscriptPlugin(
-        apiKey: config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey not configured.")
+        apiKey: config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey not configured."),
+        kernel
     ),
     "TranscriptPlugin"
 );

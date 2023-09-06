@@ -3,7 +3,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace AssemblyAiSk.Plugins;
@@ -11,16 +14,67 @@ namespace AssemblyAiSk.Plugins;
 public class TranscriptPlugin
 {
     private readonly string _apiKey;
+    private readonly IKernel _kernel;
+    private readonly ISKFunction _getCommonFolderPathFunction;
 
-    public TranscriptPlugin(string apiKey)
+    public TranscriptPlugin(string apiKey, IKernel kernel)
     {
         _apiKey = apiKey;
+        _kernel = kernel;
+        _getCommonFolderPathFunction = GetCommonFolderPathFunction();
+    }
+
+    private ISKFunction GetCommonFolderPathFunction()
+    {
+        var prompt = "What is the path for the common folder  {{$commonFolderName}} " +
+                     $"on operating platform {Environment.OSVersion.Platform.ToString()} " +
+                     $"with user profile path {Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}?";
+        var promptConfig = new PromptTemplateConfig
+        {
+            Schema = 1,
+            Type = "completion",
+            Description = "Gets the path for the given common folder.",
+            Completion =
+            {
+                MaxTokens = 500,
+                Temperature = 0.0,
+                TopP = 0.0,
+                PresencePenalty = 0.0,
+                FrequencyPenalty = 0.0
+            },
+            Input =
+            {
+                Parameters = new List<PromptTemplateConfig.InputParameter>
+                {
+                    new()
+                    {
+                        Name = "commonFolderName",
+                        Description = "Name of the common folder"
+                    }
+                }
+            }
+        };
+
+        var promptTemplate = new PromptTemplate(prompt, promptConfig, _kernel);
+        var functionConfig = new SemanticFunctionConfig(promptConfig, promptTemplate);
+        return _kernel.RegisterSemanticFunction("TranscriptPluginInternal", "GetCommonFolderPath", functionConfig);
+    }
+
+    private async Task<string?> GetCommonFolderPath(string commonFolderName)
+    {
+        var variables = new ContextVariables
+        {
+            ["commonFolderName"] = commonFolderName
+        };
+        var context = await _getCommonFolderPathFunction.InvokeAsync(variables);
+        var match = Regex.Match(context.Result, @"([a-zA-Z]?\:?[\/\\].*[\/\\][\S-[""'\.]]*)", RegexOptions.IgnoreCase);
+        return match.Success ? match.Captures[0].Value : null;
     }
 
     [SKFunction, Description("Find files in common folders.")]
     [SKParameter("fileName", "The name of the file")]
     [SKParameter("commonFolderName", "The name of the common folder")]
-    public string LocateFile(SKContext context)
+    public async Task<string> LocateFile(SKContext context)
     {
         var fileName = context.Variables["fileName"];
         var commonFolderName = context.Variables["commonFolderName"];
@@ -29,15 +83,21 @@ public class TranscriptPlugin
             null => Environment.CurrentDirectory,
             "" => Environment.CurrentDirectory,
             "." => Environment.CurrentDirectory,
-            "downloads" => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
             "desktop" => Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
             "videos" => Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
             "music" => Environment.GetFolderPath(Environment.SpecialFolder.MyMusic),
             "pictures" => Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
             "documents" => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "user" => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            _ => throw new Exception("Could not figure out the location of the common folder.")
+            _ => await GetCommonFolderPath(commonFolderName)
+                 ?? throw new Exception("Could not figure out the location of the common folder.")
         };
+
+        if (!Path.Exists(commonFolderPath))
+        {
+            throw new Exception(
+                $"Could not find {commonFolderName} folder, tried the following path: {commonFolderPath}");
+        }
 
         var foundFiles = Directory.GetFiles(commonFolderPath, fileName, SearchOption.AllDirectories);
         if (foundFiles.Length == 0)
