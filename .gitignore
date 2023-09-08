@@ -482,4 +482,4 @@ $RECYCLE.BIN/
 *.env
 
 # Ingore SK Tokenizers folder
-/src/Plugins/Tokenizers
+/src/AssemblyAI.SemanticKernel/Tokenizers

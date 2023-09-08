@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>AssemblyAI.SemanticKernel.Plugins</RootNamespace>
-    <AssemblyName>AssemblyAI.SemanticKernel.Plugins</AssemblyName>
-    <PackageId>AssemblyAI.SemanticKernel.Plugins</PackageId>
+    <RootNamespace>AssemblyAI.SemanticKernel</RootNamespace>
+    <AssemblyName>AssemblyAI.SemanticKernel</AssemblyName>
+    <PackageId>AssemblyAI.SemanticKernel</PackageId>
     <Title>AssemblyAI plugins for Semantic Kernel</Title>
     <Authors>AssemblyAI</Authors>
     <Description>Transcribe audio using AssemblyAI with Semantic Kernel plugins</Description>
@@ -26,7 +26,6 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageLicenseUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(CI)' == 'true'">

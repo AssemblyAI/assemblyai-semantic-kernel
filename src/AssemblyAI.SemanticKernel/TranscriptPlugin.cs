@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace AssemblyAI.SemanticKernel.Plugins
+namespace AssemblyAI.SemanticKernel
 {
     public class TranscriptPlugin
     {

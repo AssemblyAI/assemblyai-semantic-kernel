@@ -27,23 +27,19 @@ jobs:
           
       - name: Restore packages
         run: dotnet restore
-        working-directory: src/Plugins/
+        working-directory: src/AssemblyAI.SemanticKernel/
         
       - name: Build project
         run: dotnet build --no-restore --configuration Release
-        working-directory: src/Plugins/
+        working-directory: src/AssemblyAI.SemanticKernel/
         
-      - name: Publish project
-        run: dotnet publish --no-build --no-restore --configuration Release -o ./AssemblyAI.SemanticKernel.Plugins.nupkg
-        working-directory: src/Plugins/
-
       - name: Pack project
         run: dotnet pack -c Release -o ./package
-        working-directory: src/Plugins/
+        working-directory: src/AssemblyAI.SemanticKernel/
 
       - name: Push project to NuGet
         run: |
-          dotnet nuget push AssemblyAI.SemanticKernel.Plugins.*.nupkg \
+          dotnet nuget push AssemblyAI.SemanticKernel.*.nupkg \
             --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json
-        working-directory: src/Plugins/package
+        working-directory: src/AssemblyAI.SemanticKernel/package

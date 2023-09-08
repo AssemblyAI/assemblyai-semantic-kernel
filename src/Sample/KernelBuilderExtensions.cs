@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 
-namespace AssemblyAI.SemanticKernel.Plugins.Sample;
+namespace AssemblyAI.SemanticKernel.Sample;
 
 internal static class KernelBuilderExtensions
 {

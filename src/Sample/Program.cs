@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
-using AssemblyAI.SemanticKernel.Plugins;
-using AssemblyAI.SemanticKernel.Plugins.Sample;
+using AssemblyAI.SemanticKernel;
+using AssemblyAI.SemanticKernel.Sample;
 
 var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()

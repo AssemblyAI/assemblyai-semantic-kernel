@@ -33,8 +33,8 @@ jobs:
           
       - name: Restore packages
         run: dotnet restore
-        working-directory: src/Plugins/
+        working-directory: src/AssemblyAI.SemanticKernel/
 
       - name: Build project
         run: dotnet build --no-restore --configuration Release
-        working-directory: src/Plugins/
+        working-directory: src/AssemblyAI.SemanticKernel/

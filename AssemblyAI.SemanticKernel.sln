@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2895A6FB-A1B0-40C9-881D-B327A610DB50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plugins", "src\Plugins\Plugins.csproj", "{214BC754-9AAF-4287-9CF4-3DFF38730519}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyAI.SemanticKernel", "src\AssemblyAI.SemanticKernel\AssemblyAI.SemanticKernel.csproj", "{214BC754-9AAF-4287-9CF4-3DFF38730519}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "src\Sample\Sample.csproj", "{3877AA0C-A825-4664-957E-3025F2BB67DC}"
 EndProject

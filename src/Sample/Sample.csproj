@@ -6,11 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>9bf031e1-85d9-44ec-bcc3-bcf25b26eeaa</UserSecretsId>
-    <RootNamespace>AssemblyAI.SemanticKernel.Plugins.Sample</RootNamespace>
+    <RootNamespace>AssemblyAI.SemanticKernel.Sample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Plugins\Plugins.csproj" />
+    <ProjectReference Include="..\AssemblyAI.SemanticKernel\AssemblyAI.SemanticKernel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
