@@ -480,5 +480,6 @@ $RECYCLE.BIN/
 # Ignore .env files
 
 *.env
-/src/Plugins/Tokenizers/Settings/encoder.json
-/src/Plugins/Tokenizers/Settings/vocab.bpe
+
+# Ingore SK Tokenizers folder
+/src/Plugins/Tokenizers

@@ -2,7 +2,8 @@
 
 ---
 
-[![GitHub License](https://img.shields.io/github/license/AssemblyAI/AssemblyAI.SemanticKernel.Plugins "GitHub License")](https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins/blob/main/LICENSE)
+[![GitHub License](https://img.shields.io/github/license/AssemblyAI/AssemblyAI.SemanticKernel "GitHub License")](https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins/blob/main/LICENSE)
+[![CI Build](https://github.com/AssemblyAI/AssemblyAI.SemanticKernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Swimburger/AssemblyAI.SemanticKernel.Plugins/actions/workflows/ci.yml)
 [![AssemblyAI Twitter](https://img.shields.io/twitter/follow/AssemblyAI?label=%40AssemblyAI&style=social "AssemblyAI Twitter")](https://twitter.com/AssemblyAI)
 [![AssemblyAI YouTube](https://img.shields.io/youtube/channel/subscribers/UCtatfZMf-8EkIwASXM4ts0A "AssemblyAI YouTube")](https://www.youtube.com/@AssemblyAI)
 

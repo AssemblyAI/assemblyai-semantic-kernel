@@ -17,8 +17,8 @@
     <PackageVersion>1.0.0-alpha</PackageVersion>
     <OutputType>Library</OutputType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.git</RepositoryUrl>
     <PackageIconUrl>https://www.assemblyai.com/favicon.png</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -26,7 +26,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageLicenseUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(CI)' == 'true'">
