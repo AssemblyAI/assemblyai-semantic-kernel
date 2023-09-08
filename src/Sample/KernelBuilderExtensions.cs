@@ -1,9 +1,7 @@
-// Copyright (c) Microsoft. All rights reserved.
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 
-namespace AssemblyAiSk.Sample;
+namespace AssemblyAI.SemanticKernel.Plugins.Sample;
 
 internal static class KernelBuilderExtensions
 {

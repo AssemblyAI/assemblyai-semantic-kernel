@@ -4,7 +4,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace AssemblyAiSk.Sample;
+namespace AssemblyAI.SemanticKernel.Plugins.Sample;
 
 public class FindFilePlugin
 {

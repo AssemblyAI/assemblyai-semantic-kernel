@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>9bf031e1-85d9-44ec-bcc3-bcf25b26eeaa</UserSecretsId>
-    <RootNamespace>AssemblyAiSk.Sample</RootNamespace>
+    <RootNamespace>AssemblyAI.SemanticKernel.Plugins.Sample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,15 +1,51 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>AssemblyAiSk.Plugins</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>AssemblyAI.SemanticKernel.Plugins</RootNamespace>
+    <AssemblyName>AssemblyAI.SemanticKernel.Plugins</AssemblyName>
+    <PackageId>AssemblyAI.SemanticKernel.Plugins</PackageId>
+    <Title>AssemblyAI plugins for Semantic Kernel</Title>
+    <Authors>AssemblyAI</Authors>
+    <Description>Transcribe audio using AssemblyAI with Semantic Kernel plugins</Description>
+    <Copyright>Copyright 2023 (c) AssemblyAI, Inc. All rights reserved.</Copyright>
+    <PackageTags>SemanticKernel;AI;AssemblyAI;transcript</PackageTags>
+    <Company>AssemblyAI</Company>
+    <Product>AssemblyAI</Product>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageVersion>1.0.0-alpha</PackageVersion>
+    <OutputType>Library</OutputType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins.git</RepositoryUrl>
+    <PackageIconUrl>https://www.assemblyai.com/favicon.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageLicenseUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.Plugins/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel">
       <Version>0.22.230905.3-preview</Version>
     </PackageReference>
+    <PackageReference Include="System.Net.Http.Json">
+      <Version>7.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

@@ -476,3 +476,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Ignore .env files
+
+*.env
+/src/Plugins/Tokenizers/Settings/encoder.json
+/src/Plugins/Tokenizers/Settings/vocab.bpe

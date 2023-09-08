@@ -1,139 +1,129 @@
+using System;
 using System.ComponentModel;
+using System.IO;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace AssemblyAiSk.Plugins;
-
-public class TranscriptPlugin
+namespace AssemblyAI.SemanticKernel.Plugins
 {
-    private readonly string _apiKey;
-    public bool AllowFileSystemAccess { get; set; }
-
-    public TranscriptPlugin(string apiKey)
+    public class TranscriptPlugin
     {
-        _apiKey = apiKey;
-    }
+        private readonly string _apiKey;
+        public bool AllowFileSystemAccess { get; set; }
 
-    [SKFunction]
-    [Description("Upload audio or video file to AssemblyAI so it can be transcribed and return the URL of the file.")]
-    [SKParameter("path", "The path of the audio or video file")]
-    public async Task<string> Upload(SKContext context)
-    {
-        var path = context.Variables["path"];
-        return await UploadFileAsync(path).ConfigureAwait(false);
-    }
-
-    private async Task<string> UploadFileAsync(string path)
-    {
-        if (AllowFileSystemAccess == false)
+        public TranscriptPlugin(string apiKey)
         {
-            throw new Exception(
-                "You need to allow file system access to upload files. Set TranscriptPlugin.AllowFileSystemAccess to true.");
+            _apiKey = apiKey;
         }
 
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue(_apiKey);
-        await using var fileStream = File.OpenRead(path);
-        using var fileContent = new StreamContent(fileStream);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-        using var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/upload", fileContent);
-        response.EnsureSuccessStatusCode();
-        var jsonDoc = await response.Content.ReadFromJsonAsync<JsonDocument>();
-        return jsonDoc?.RootElement.GetProperty("upload_url").GetString()!;
-    }
-
-    [SKFunction, Description("Transcribe an audio or video file to text.")]
-    [SKParameter("audioUrl",
-        "The URL of the audio or video file. Optional if createTranscriptParameters is configured.")]
-    [SKParameter("createTranscriptParameters",
-        "The parameters to create an AssemblyAI transcript as a JSON object. Optional if audioUrl is configured.")]
-    public async Task<string> Transcribe(SKContext context)
-    {
-        context.Variables.TryGetValue("audioUrl", out var audioUrl);
-        context.Variables.TryGetValue("createTranscriptParameters", out var createTranscriptParameters);
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue(_apiKey);
-        var transcript = await CreateTranscriptAsync(audioUrl, createTranscriptParameters, httpClient);
-        transcript = await WaitForTranscriptToProcess(transcript, httpClient);
-        return transcript.Text;
-    }
-
-    private static async Task<Transcript> CreateTranscriptAsync(
-        string? audioUrl,
-        string? createTranscriptParameters,
-        HttpClient httpClient
-    )
-    {
-        string jsonString;
-        if (!string.IsNullOrEmpty(createTranscriptParameters))
+        [SKFunction, Description("Transcribe an audio or video file to text.")]
+        [SKParameter("filePath", @"The path of the audio or video file. 
+If filePath is configured, the file will be uploaded to AssemblyAI, and then used as the audioUrl to transcribe. 
+Optional if audioUrl is configured. The uploaded file will override the audioUrl parameter.")]
+        [SKParameter("audioUrl", @"The public URL of the audio or video file to transcribe. 
+Optional if filePath is configured.
+    """)]
+        public async Task<string> Transcribe(SKContext context)
         {
-            var jsonNode = JsonNode.Parse(createTranscriptParameters)!;
-            if (!string.IsNullOrEmpty(audioUrl))
+            using (var httpClient = new HttpClient())
             {
-                jsonNode["audio_url"] = audioUrl;
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
+
+                string audioUrl;
+                if (context.Variables.TryGetValue("filePath", out var filePath))
+                {
+                    if (AllowFileSystemAccess == false)
+                    {
+                        throw new Exception(
+                            "You need to allow file system access to upload files. Set TranscriptPlugin.AllowFileSystemAccess to true."
+                        );
+                    }
+
+                    audioUrl = await UploadFileAsync(filePath, httpClient);
+                }
+                else
+                {
+                    context.Variables.TryGetValue("audioUrl", out audioUrl);
+                }
+
+                if (audioUrl is null) throw new Exception("You have to pass in the filePath or audioUrl parameter.");
+
+                var transcript = await CreateTranscriptAsync(audioUrl, httpClient);
+                transcript = await WaitForTranscriptToProcess(transcript, httpClient);
+                return transcript.Text ?? throw new Exception("Transcript text is null. This should not happen.");
             }
-
-            jsonString = jsonNode.ToJsonString();
         }
-        else if (!string.IsNullOrEmpty(audioUrl))
+
+        private static async Task<string> UploadFileAsync(string path, HttpClient httpClient)
         {
-            var json = new JsonObject
+            using (var fileStream = File.OpenRead(path))
+            using (var fileContent = new StreamContent(fileStream))
             {
-                ["audio_url"] = audioUrl
-            };
-            jsonString = json.ToJsonString();
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                using (var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/upload", fileContent))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var jsonDoc = await response.Content.ReadFromJsonAsync<JsonDocument>();
+                    return jsonDoc?.RootElement.GetProperty("upload_url").GetString();
+                }
+            }
         }
-        else
+
+        private static async Task<Transcript> CreateTranscriptAsync(string audioUrl, HttpClient httpClient)
         {
-            throw new Exception("audioUrl or createTranscriptParameters has to be passed into the function.");
-        }
-
-        var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        using var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/transcript", content);
-        response.EnsureSuccessStatusCode();
-        var transcript = (await response.Content.ReadFromJsonAsync<Transcript>())!;
-        if (transcript.Status == "error") throw new Exception(transcript.Error);
-        return transcript;
-    }
-
-    private static async Task<Transcript> WaitForTranscriptToProcess(Transcript transcript, HttpClient httpClient)
-    {
-        var pollingEndpoint = $"https://api.assemblyai.com/v2/transcript/{transcript.Id}";
-
-        while (true)
-        {
-            var pollingResponse = await httpClient.GetAsync(pollingEndpoint);
-            pollingResponse.EnsureSuccessStatusCode();
-            transcript = (await pollingResponse.Content.ReadFromJsonAsync<Transcript>())!;
-            switch (transcript.Status)
+            var jsonString = JsonSerializer.Serialize(new
             {
-                case "processing":
-                case "queued":
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                    break;
-                case "completed":
-                case "error":
-                    throw new Exception(transcript.Error);
-                default:
-                    throw new Exception("This code shouldn't be reachable.");
+                audio_url = audioUrl
+            });
+
+            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            using (var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/transcript", content))
+            {
+                response.EnsureSuccessStatusCode();
+                var transcript = (await response.Content.ReadFromJsonAsync<Transcript>());
+                if (transcript.Status == "error") throw new Exception(transcript.Error);
+                return transcript;
+            }
+        }
+
+        private static async Task<Transcript> WaitForTranscriptToProcess(Transcript transcript, HttpClient httpClient)
+        {
+            var pollingEndpoint = $"https://api.assemblyai.com/v2/transcript/{transcript.Id}";
+
+            while (true)
+            {
+                var pollingResponse = await httpClient.GetAsync(pollingEndpoint);
+                pollingResponse.EnsureSuccessStatusCode();
+                transcript = (await pollingResponse.Content.ReadFromJsonAsync<Transcript>());
+                switch (transcript.Status)
+                {
+                    case "processing":
+                    case "queued":
+                        await Task.Delay(TimeSpan.FromSeconds(3));
+                        break;
+                    case "completed":
+                        return transcript;
+                    case "error":
+                        throw new Exception(transcript.Error);
+                    default:
+                        throw new Exception("This code shouldn't be reachable.");
+                }
             }
         }
     }
-}
 
-public class Transcript
-{
-    public string Id { get; set; }
-    public string Status { get; set; }
-    public string Text { get; set; }
+    public class Transcript
+    {
+        public string Id { get; set; } = null;
+        public string Status { get; set; } = null;
+        public string Text { get; set; }
 
-    public string Error { get; set; }
+        public string Error { get; set; }
+    }
 }

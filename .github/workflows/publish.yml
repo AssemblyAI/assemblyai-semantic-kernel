@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+env:
+  CI: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and pack
+    steps:
+      - run: |
+          echo "Name: ${{ github.event.release.name }} Description: ${{ github.event.release.body }}"
+          
+      - uses: actions/checkout@v3
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          dotnet-quality: ga
+          
+      - name: Restore packages
+        run: dotnet restore
+        working-directory: src/Plugins/
+        
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
+        working-directory: src/Plugins/
+        
+      - name: Publish project
+        run: dotnet publish --no-build --no-restore --configuration Release -o ./AssemblyAI.SemanticKernel.Plugins.nupkg
+        working-directory: src/Plugins/
+
+      - name: Pack project
+        run: dotnet pack -c Release -o ./package
+        working-directory: src/Plugins/
+
+      - name: Push project to NuGet
+        run: |
+          dotnet nuget push AssemblyAI.SemanticKernel.Plugins.*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json
+        working-directory: src/Plugins/package
