@@ -4,6 +4,7 @@ using AssemblyAiSk.Sample;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
 
@@ -13,25 +14,40 @@ var config = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
 
-using var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder
-        .SetMinimumLevel(0);
-});
+using var loggerFactory = LoggerFactory.Create(builder => { builder.SetMinimumLevel(0); });
 
 var kernel = new KernelBuilder()
     .WithCompletionService(config)
     .WithLoggerFactory(loggerFactory)
     .Build();
 
+var findFilePlugin = kernel.ImportSkill(
+    new FindFilePlugin(kernel),
+    "FindFilePlugin"
+);
 var transcriptPlugin = kernel.ImportSkill(
-    new TranscriptPlugin(
-        apiKey: config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey not configured."),
-        kernel
-    ),
+    new TranscriptPlugin(apiKey: config["AssemblyAI:ApiKey"]
+                                 ?? throw new Exception("AssemblyAI:ApiKey not configured."))
+    {
+        AllowFileSystemAccess = true
+    },
     "TranscriptPlugin"
 );
+var variables = new ContextVariables
+{
+    ["audioUrl"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a",
+    ["createTranscriptParameters"] = """
+{
+    "language_code": "en_us"
+}
+"""
+};
 
+var result = await kernel.Skills
+    .GetFunction("TranscriptPlugin", "Transcribe")
+    .InvokeAsync(variables);
+Console.WriteLine(result.Result);
+return;
 var planner = new SequentialPlanner(kernel);
 
 const string prompt = "Transcribe the espn.m4a in my downloads folder.";

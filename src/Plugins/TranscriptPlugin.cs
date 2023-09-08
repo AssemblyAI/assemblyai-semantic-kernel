@@ -3,10 +3,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using Microsoft.SemanticKernel;
+using System.Text.Json.Nodes;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace AssemblyAiSk.Plugins;
@@ -14,98 +12,11 @@ namespace AssemblyAiSk.Plugins;
 public class TranscriptPlugin
 {
     private readonly string _apiKey;
-    private readonly IKernel _kernel;
-    private readonly ISKFunction _getCommonFolderPathFunction;
+    public bool AllowFileSystemAccess { get; set; }
 
-    public TranscriptPlugin(string apiKey, IKernel kernel)
+    public TranscriptPlugin(string apiKey)
     {
         _apiKey = apiKey;
-        _kernel = kernel;
-        _getCommonFolderPathFunction = GetCommonFolderPathFunction();
-    }
-
-    private ISKFunction GetCommonFolderPathFunction()
-    {
-        var prompt = "What is the path for the common folder  {{$commonFolderName}} " +
-                     $"on operating platform {Environment.OSVersion.Platform.ToString()} " +
-                     $"with user profile path {Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}?";
-        var promptConfig = new PromptTemplateConfig
-        {
-            Schema = 1,
-            Type = "completion",
-            Description = "Gets the path for the given common folder.",
-            Completion =
-            {
-                MaxTokens = 500,
-                Temperature = 0.0,
-                TopP = 0.0,
-                PresencePenalty = 0.0,
-                FrequencyPenalty = 0.0
-            },
-            Input =
-            {
-                Parameters = new List<PromptTemplateConfig.InputParameter>
-                {
-                    new()
-                    {
-                        Name = "commonFolderName",
-                        Description = "Name of the common folder"
-                    }
-                }
-            }
-        };
-
-        var promptTemplate = new PromptTemplate(prompt, promptConfig, _kernel);
-        var functionConfig = new SemanticFunctionConfig(promptConfig, promptTemplate);
-        return _kernel.RegisterSemanticFunction("TranscriptPluginInternal", "GetCommonFolderPath", functionConfig);
-    }
-
-    private async Task<string?> GetCommonFolderPath(string commonFolderName)
-    {
-        var variables = new ContextVariables
-        {
-            ["commonFolderName"] = commonFolderName
-        };
-        var context = await _getCommonFolderPathFunction.InvokeAsync(variables);
-        var match = Regex.Match(context.Result, @"([a-zA-Z]?\:?[\/\\].*[\/\\][\S-[""'\.]]*)", RegexOptions.IgnoreCase);
-        return match.Success ? match.Captures[0].Value : null;
-    }
-
-    [SKFunction, Description("Find files in common folders.")]
-    [SKParameter("fileName", "The name of the file")]
-    [SKParameter("commonFolderName", "The name of the common folder")]
-    public async Task<string> LocateFile(SKContext context)
-    {
-        var fileName = context.Variables["fileName"];
-        var commonFolderName = context.Variables["commonFolderName"];
-        var commonFolderPath = commonFolderName?.ToLower() switch
-        {
-            null => Environment.CurrentDirectory,
-            "" => Environment.CurrentDirectory,
-            "." => Environment.CurrentDirectory,
-            "desktop" => Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-            "videos" => Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
-            "music" => Environment.GetFolderPath(Environment.SpecialFolder.MyMusic),
-            "pictures" => Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
-            "documents" => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "user" => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            _ => await GetCommonFolderPath(commonFolderName)
-                 ?? throw new Exception("Could not figure out the location of the common folder.")
-        };
-
-        if (!Path.Exists(commonFolderPath))
-        {
-            throw new Exception(
-                $"Could not find {commonFolderName} folder, tried the following path: {commonFolderPath}");
-        }
-
-        var foundFiles = Directory.GetFiles(commonFolderPath, fileName, SearchOption.AllDirectories);
-        if (foundFiles.Length == 0)
-        {
-            throw new Exception($"Could not find file named {fileName} in {commonFolderPath}.");
-        }
-
-        return foundFiles.First();
     }
 
     [SKFunction]
@@ -114,6 +25,17 @@ public class TranscriptPlugin
     public async Task<string> Upload(SKContext context)
     {
         var path = context.Variables["path"];
+        return await UploadFileAsync(path).ConfigureAwait(false);
+    }
+
+    private async Task<string> UploadFileAsync(string path)
+    {
+        if (AllowFileSystemAccess == false)
+        {
+            throw new Exception(
+                "You need to allow file system access to upload files. Set TranscriptPlugin.AllowFileSystemAccess to true.");
+        }
+
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(_apiKey);
@@ -128,26 +50,58 @@ public class TranscriptPlugin
     }
 
     [SKFunction, Description("Transcribe an audio or video file to text.")]
-    [SKParameter("audioUrl", "The URL of the audio or video file")]
+    [SKParameter("audioUrl",
+        "The URL of the audio or video file. Optional if createTranscriptParameters is configured.")]
+    [SKParameter("createTranscriptParameters",
+        "The parameters to create an AssemblyAI transcript as a JSON object. Optional if audioUrl is configured.")]
     public async Task<string> Transcribe(SKContext context)
     {
-        var audioUrl = context.Variables["audioUrl"];
+        context.Variables.TryGetValue("audioUrl", out var audioUrl);
+        context.Variables.TryGetValue("createTranscriptParameters", out var createTranscriptParameters);
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(_apiKey);
-        var transcript = await CreateTranscriptAsync(audioUrl, httpClient);
+        var transcript = await CreateTranscriptAsync(audioUrl, createTranscriptParameters, httpClient);
         transcript = await WaitForTranscriptToProcess(transcript, httpClient);
         return transcript.Text;
     }
 
-    private static async Task<Transcript> CreateTranscriptAsync(string audioUrl, HttpClient httpClient)
+    private static async Task<Transcript> CreateTranscriptAsync(
+        string? audioUrl,
+        string? createTranscriptParameters,
+        HttpClient httpClient
+    )
     {
-        var data = new { audio_url = audioUrl };
-        var content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+        string jsonString;
+        if (!string.IsNullOrEmpty(createTranscriptParameters))
+        {
+            var jsonNode = JsonNode.Parse(createTranscriptParameters)!;
+            if (!string.IsNullOrEmpty(audioUrl))
+            {
+                jsonNode["audio_url"] = audioUrl;
+            }
 
+            jsonString = jsonNode.ToJsonString();
+        }
+        else if (!string.IsNullOrEmpty(audioUrl))
+        {
+            var json = new JsonObject
+            {
+                ["audio_url"] = audioUrl
+            };
+            jsonString = json.ToJsonString();
+        }
+        else
+        {
+            throw new Exception("audioUrl or createTranscriptParameters has to be passed into the function.");
+        }
+
+        var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
         using var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/transcript", content);
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<Transcript>())!;
+        var transcript = (await response.Content.ReadFromJsonAsync<Transcript>())!;
+        if (transcript.Status == "error") throw new Exception(transcript.Error);
+        return transcript;
     }
 
     private static async Task<Transcript> WaitForTranscriptToProcess(Transcript transcript, HttpClient httpClient)
@@ -167,7 +121,7 @@ public class TranscriptPlugin
                     break;
                 case "completed":
                 case "error":
-                    return transcript;
+                    throw new Exception(transcript.Error);
                 default:
                     throw new Exception("This code shouldn't be reachable.");
             }
