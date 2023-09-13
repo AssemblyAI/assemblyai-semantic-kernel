@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using AssemblyAI.SemanticKernel;
 using AssemblyAI.SemanticKernel.Sample;
+using Microsoft.Extensions.Logging;
 
 var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
@@ -12,7 +13,10 @@ var config = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
 
+using var loggerFactory = LoggerFactory.Create(builder => { builder.SetMinimumLevel(0); });
 var kernel = new KernelBuilder()
+    .WithCompletionService(config)
+    .WithLoggerFactory(loggerFactory)
     .Build();
 
 var apiKey = config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey not configured.");
