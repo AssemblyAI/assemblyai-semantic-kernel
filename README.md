@@ -83,4 +83,4 @@ Console.WriteLine(context.Result);
 If `filePath` and `audioUrl` are specified, the `filePath` will be used to upload the file and `audioUrl` will be overridden.
 
 The code above explicitly invokes the transcript plugin, but it can also be invoked as part of a plan. 
-Check out [the Sample project](./src/Sample/Program.cs#L50) which uses a plan to transcribe an audio file in addition to explicit invocation.
+Check out [the Sample project](./src/Sample/Program.cs#L54) which uses a plan to transcribe an audio file in addition to explicit invocation.
