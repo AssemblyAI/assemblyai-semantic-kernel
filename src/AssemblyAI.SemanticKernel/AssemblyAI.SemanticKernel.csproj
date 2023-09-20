@@ -17,8 +17,8 @@
     <PackageVersion>1.0.0-alpha</PackageVersion>
     <OutputType>Library</OutputType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AssemblyAI/AssemblyAI.SemanticKernel.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel.git</RepositoryUrl>
     <PackageIconUrl>https://www.assemblyai.com/favicon.png</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel">
-      <Version>0.22.230905.3-preview</Version>
+      <Version>0.24.230918.1-preview</Version>
     </PackageReference>
     <PackageReference Include="System.Net.Http.Json">
       <Version>7.0.1</Version>
