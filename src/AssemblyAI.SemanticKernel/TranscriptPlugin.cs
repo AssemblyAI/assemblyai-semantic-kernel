@@ -14,6 +14,7 @@ namespace AssemblyAI.SemanticKernel
 {
     public class TranscriptPlugin
     {
+        public const string PluginName = nameof(TranscriptPlugin);
         private readonly string _apiKey;
         public bool AllowFileSystemAccess { get; set; }
 
@@ -21,6 +22,8 @@ namespace AssemblyAI.SemanticKernel
         {
             _apiKey = apiKey;
         }
+
+        public const string TranscribeFunctionName = nameof(Transcribe);
 
         [SKFunction, Description("Transcribe an audio or video file to text.")]
         [SKParameter("filePath", @"The path of the audio or video file. 

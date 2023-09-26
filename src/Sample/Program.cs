@@ -15,18 +15,21 @@ var config = new ConfigurationBuilder()
 
 using var loggerFactory = LoggerFactory.Create(builder => { builder.SetMinimumLevel(0); });
 var kernel = new KernelBuilder()
-    .WithCompletionService(config)
+    .WithOpenAIChatCompletionService(
+        "gpt-3.5-turbo",
+        config["OpenAI:ApiKey"] ?? throw new Exception("OpenAI:ApiKey configuration is required.")
+    )
     .WithLoggerFactory(loggerFactory)
     .Build();
 
-var apiKey = config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey not configured.");
+var apiKey = config["AssemblyAI:ApiKey"] ?? throw new Exception("AssemblyAI:ApiKey configuration is required.");
 
 var transcriptPlugin = kernel.ImportSkill(
     new TranscriptPlugin(apiKey: apiKey)
     {
         AllowFileSystemAccess = true
     },
-    "TranscriptPlugin"
+    TranscriptPlugin.PluginName
 );
 
 await TranscribeFileUsingPlugin(kernel);
@@ -39,7 +42,7 @@ async Task TranscribeFileUsingPlugin(IKernel kernel)
     };
 
     var result = await kernel.Skills
-        .GetFunction("TranscriptPlugin", "Transcribe")
+        .GetFunction(TranscriptPlugin.PluginName, TranscriptPlugin.TranscribeFunctionName)
         .InvokeAsync(variables);
     Console.WriteLine(result.Result);
 }
