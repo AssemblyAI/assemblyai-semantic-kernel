@@ -8,6 +8,7 @@ namespace AssemblyAI.SemanticKernel.Sample;
 
 public class FindFilePlugin
 {
+    public const string PluginName = "FindFilePlugin";
     private readonly IKernel _kernel;
 
     public FindFilePlugin(IKernel kernel)
@@ -31,6 +32,9 @@ public class FindFilePlugin
         );
         return matches.LastOrDefault()?.Value ?? null;
     }
+
+
+    public const string LocateFileFunctionName = nameof(LocateFile);
 
     [SKFunction, Description("Find files in common folders.")]
     [SKParameter("fileName", "The name of the file")]
