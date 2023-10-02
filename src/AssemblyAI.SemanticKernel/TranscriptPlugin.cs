@@ -30,16 +30,15 @@ namespace AssemblyAI.SemanticKernel
 If filePath is configured, the file will be uploaded to AssemblyAI, and then used as the audioUrl to transcribe. 
 Optional if audioUrl is configured. The uploaded file will override the audioUrl parameter.")]
         [SKParameter("audioUrl", @"The public URL of the audio or video file to transcribe. 
-Optional if filePath is configured.
-    """)]
+Optional if filePath is configured.")]
         public async Task<string> Transcribe(SKContext context)
         {
+            SetPathAndUrl(context, out var filePath, out var audioUrl);
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
 
-                string audioUrl;
-                if (context.Variables.TryGetValue("filePath", out var filePath))
+                if (filePath != null)
                 {
                     if (AllowFileSystemAccess == false)
                     {
@@ -50,16 +49,56 @@ Optional if filePath is configured.
 
                     audioUrl = await UploadFileAsync(filePath, httpClient);
                 }
-                else
-                {
-                    context.Variables.TryGetValue("audioUrl", out audioUrl);
-                }
-
-                if (audioUrl is null) throw new Exception("You have to pass in the filePath or audioUrl parameter.");
 
                 var transcript = await CreateTranscriptAsync(audioUrl, httpClient);
                 transcript = await WaitForTranscriptToProcess(transcript, httpClient);
                 return transcript.Text ?? throw new Exception("Transcript text is null. This should not happen.");
+            }
+        }
+
+        private static void SetPathAndUrl(SKContext context, out string filePath, out string audioUrl)
+        {
+            filePath = null;
+            audioUrl = null;
+            if (context.Variables.TryGetValue("filePath", out filePath))
+            {
+                return;
+            }
+
+            if (context.Variables.TryGetValue("audioUrl", out audioUrl))
+            {
+                var uri = new Uri(audioUrl);
+                if (uri.IsFile)
+                {
+                    filePath = uri.LocalPath;
+                    audioUrl = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            context.Variables.TryGetValue("INPUT", out var input);
+            if (input == null)
+            {
+                throw new Exception("You must pass in INPUT, filePath, or audioUrl parameter.");
+            }
+
+            if (Uri.TryCreate(input, UriKind.Absolute, out var inputUrl))
+            {
+                if (inputUrl.IsFile)
+                {
+                    filePath = inputUrl.LocalPath;
+                }
+                else
+                {
+                    audioUrl = input;
+                }
+            }
+            else
+            {
+                filePath = input;
             }
         }
 
