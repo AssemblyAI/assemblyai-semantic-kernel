@@ -11,9 +11,9 @@
     <PackageTags>SemanticKernel;AI;AssemblyAI;transcript</PackageTags>
     <Company>AssemblyAI</Company>
     <Product>AssemblyAI</Product>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <PackageVersion>1.0.1-alpha</PackageVersion>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <PackageVersion>1.0.2-alpha</PackageVersion>
     <OutputType>Library</OutputType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel</PackageProjectUrl>
