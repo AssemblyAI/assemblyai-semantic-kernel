@@ -102,7 +102,7 @@ If the `INPUT` variable is a URL, it'll be used as the `audioUrl`, otherwise, it
 If either `audioUrl` or `filePath` are configured, `INPUT` is ignored.
 
 All the code above explicitly invokes the transcript plugin, but it can also be invoked as part of a plan. 
-Check out [the Sample project](./src/Sample/Program.cs#L50) which uses a plan to transcribe an audio file in addition to explicit invocation.
+Check out [the Sample project](./src/Sample/Program.cs#L96)) which uses a plan to transcribe an audio file in addition to explicit invocation.
 
 ## Notes
 
