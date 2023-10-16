@@ -2,10 +2,13 @@
 
 ---
 
-[![GitHub License](https://img.shields.io/github/license/AssemblyAI/assemblyai-semantic-kernel "GitHub License")](https://github.com/AssemblyAI/assemblyai-semantic-kernel/blob/main/LICENSE)
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/AssemblyAI.SemanticKernel)](https://www.nuget.org/packages/AssemblyAI.SemanticKernel/)
 [![CI Build](https://github.com/AssemblyAI/assemblyai-semantic-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/AssemblyAI/assemblyai-semantic-kernel/actions/workflows/ci.yml)
-[![AssemblyAI Twitter](https://img.shields.io/twitter/follow/AssemblyAI?label=%40AssemblyAI&style=social "AssemblyAI Twitter")](https://twitter.com/AssemblyAI)
-[![AssemblyAI YouTube](https://img.shields.io/youtube/channel/subscribers/UCtatfZMf-8EkIwASXM4ts0A "AssemblyAI YouTube")](https://www.youtube.com/@AssemblyAI)
+[![GitHub License](https://img.shields.io/github/license/AssemblyAI/assemblyai-semantic-kernel "GitHub License")](https://github.com/AssemblyAI/assemblyai-semantic-kernel/blob/main/LICENSE)
+[![AssemblyAI Twitter](https://img.shields.io/twitter/follow/AssemblyAI?label=%40AssemblyAI&style=social)](https://twitter.com/AssemblyAI)
+[![AssemblyAI YouTube](https://img.shields.io/youtube/channel/subscribers/UCtatfZMf-8EkIwASXM4ts0A)](https://www.youtube.com/@AssemblyAI)
+[![Discord](https://img.shields.io/discord/875120158014853141?logo=discord&label=Discord&link=https%3A%2F%2Fdiscord.com%2Fchannels%2F875120158014853141&style=social)
+](https://discord.gg/5aQNZyq3)
 
 # AssemblyAI integration for Semantic Kernel
 
