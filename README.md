@@ -27,7 +27,6 @@ Next, register the `TranscriptPlugin` into your kernel:
 ```csharp
 using AssemblyAI.SemanticKernel;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Orchestration;
 
 // Build your kernel
 var kernel = new KernelBuilder().Build();
@@ -36,7 +35,7 @@ var kernel = new KernelBuilder().Build();
 string apiKey = Environment.GetEnvironmentVariable("ASSEMBLYAI_API_KEY")
   ?? throw new Exception("ASSEMBLYAI_API_KEY env variable not configured.");
 
-var transcriptPlugin = kernel.ImportSkill(
+kernel.ImportFunctions(
     new TranscriptPlugin(apiKey: apiKey),
     TranscriptPlugin.PluginName
 );
@@ -46,47 +45,37 @@ var transcriptPlugin = kernel.ImportSkill(
 
 Get the `Transcribe` function from the transcript plugin and invoke it with the context variables.
 ```csharp
-var function = kernel.Skills
+var function = kernel.Functions
     .GetFunction(TranscriptPlugin.PluginName, TranscriptPlugin.TranscribeFunctionName);
 var context = kernel.CreateNewContext();
-context.Variables["audioUrl"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a";
-await function.InvokeAsync(context);
-Console.WriteLine(context.Result);
+context.Variables["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a";
+var result = await function.InvokeAsync(context);
+Console.WriteLine(result.GetValue<string());
 ```
 
-The `context.Result` property contains the transcript text if successful.
+You can get the transcript using `result.GetValue<string>()`.
 
 You can also upload local audio and video file. To do this:
-- Set the `TranscriptPlugin.AllowFileSystemAccess` property to `true`
-- Configure the path of the file to upload as the `filePath` parameter
+- Set the `TranscriptPlugin.AllowFileSystemAccess` property to `true`.
+- Configure the `INPUT` variable with a local file path.
 
 ```csharp
-var transcriptPlugin = kernel.ImportSkill(
+kernel.ImportFunctions(
     new TranscriptPlugin(apiKey: apiKey)
     {
         AllowFileSystemAccess = true
     },
     TranscriptPlugin.PluginName
 );
-var function = kernel.Skills
+var function = kernel.Functions
     .GetFunction(TranscriptPlugin.PluginName, TranscriptPlugin.TranscribeFunctionName);
 var context = kernel.CreateNewContext();
-context.Variables["filePath"] = "./espn.m4a";
-await function.InvokeAsync(context);
-Console.WriteLine(context.Result);
+context.Variables["INPUT"] = "./espn.m4a";
+var result = await function.InvokeAsync(context);
+Console.WriteLine(result.GetValue<string>());
 ```
 
-If `filePath` and `audioUrl` are specified, the `filePath` will be used to upload the file and `audioUrl` will be overridden.
-
-Lastly, you can also use the `INPUT` variable, so you can transcribe a file like this.
-
-```csharp
-var function = kernel.Skills
-    .GetFunction(TranscriptPlugin.PluginName, TranscriptPlugin.TranscribeFunctionName);
-var context = await function.InvokeAsync("./espn.m4a");
-```
-
-Or from within a semantic function like this.
+You can also invoke the function from within a semantic function like this.
 
 ```csharp
 var prompt = """
@@ -97,12 +86,9 @@ var prompt = """
              """;
 var context = kernel.CreateNewContext();
 var function = kernel.CreateSemanticFunction(prompt);
-await function.InvokeAsync(context);
-Console.WriteLine(context.Result);
+var result = await function.InvokeAsync(context);
+Console.WriteLine(result.GetValue<string>());
 ```
-
-If the `INPUT` variable is a URL, it'll be used as the `audioUrl`, otherwise, it'll be used as the `filePath`.
-If either `audioUrl` or `filePath` are configured, `INPUT` is ignored.
 
 All the code above explicitly invokes the transcript plugin, but it can also be invoked as part of a plan. 
 Check out [the Sample project](./src/Sample/Program.cs#L96)) which uses a plan to transcribe an audio file in addition to explicit invocation.

@@ -7,8 +7,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SkillDefinition;
+using Microsoft.SemanticKernel;
 
 namespace AssemblyAI.SemanticKernel
 {
@@ -26,19 +25,21 @@ namespace AssemblyAI.SemanticKernel
         public const string TranscribeFunctionName = nameof(Transcribe);
 
         [SKFunction, Description("Transcribe an audio or video file to text.")]
-        [SKParameter("filePath", @"The path of the audio or video file. 
-If filePath is configured, the file will be uploaded to AssemblyAI, and then used as the audioUrl to transcribe. 
-Optional if audioUrl is configured. The uploaded file will override the audioUrl parameter.")]
-        [SKParameter("audioUrl", @"The public URL of the audio or video file to transcribe. 
-Optional if filePath is configured.")]
-        public async Task<string> Transcribe(SKContext context)
+        public async Task<string> Transcribe(
+            [Description("The public URL or the local path of the audio or video file to transcribe.")]
+            string input
+        )
         {
-            SetPathAndUrl(context, out var filePath, out var audioUrl);
+            if (string.IsNullOrEmpty(input))
+            {
+                throw new Exception("The INPUT parameter is required.");
+            }
+
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
-
-                if (filePath != null)
+                string audioUrl;
+                if (TryGetPath(input, out var filePath))
                 {
                     if (AllowFileSystemAccess == false)
                     {
@@ -49,6 +50,10 @@ Optional if filePath is configured.")]
 
                     audioUrl = await UploadFileAsync(filePath, httpClient);
                 }
+                else
+                {
+                    audioUrl = input;
+                }
 
                 var transcript = await CreateTranscriptAsync(audioUrl, httpClient);
                 transcript = await WaitForTranscriptToProcess(transcript, httpClient);
@@ -56,50 +61,22 @@ Optional if filePath is configured.")]
             }
         }
 
-        private static void SetPathAndUrl(SKContext context, out string filePath, out string audioUrl)
+        private static bool TryGetPath(string input, out string filePath)
         {
-            filePath = null;
-            audioUrl = null;
-            if (context.Variables.TryGetValue("filePath", out filePath))
-            {
-                return;
-            }
-
-            if (context.Variables.TryGetValue("audioUrl", out audioUrl))
-            {
-                var uri = new Uri(audioUrl);
-                if (uri.IsFile)
-                {
-                    filePath = uri.LocalPath;
-                    audioUrl = null;
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            context.Variables.TryGetValue("INPUT", out var input);
-            if (input == null)
-            {
-                throw new Exception("You must pass in INPUT, filePath, or audioUrl parameter.");
-            }
-
             if (Uri.TryCreate(input, UriKind.Absolute, out var inputUrl))
             {
                 if (inputUrl.IsFile)
                 {
                     filePath = inputUrl.LocalPath;
+                    return true;
                 }
-                else
-                {
-                    audioUrl = input;
-                }
+
+                filePath = null;
+                return false;
             }
-            else
-            {
-                filePath = input;
-            }
+
+            filePath = input;
+            return true;
         }
 
         private static async Task<string> UploadFileAsync(string path, HttpClient httpClient)
@@ -128,7 +105,7 @@ Optional if filePath is configured.")]
             using (var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/transcript", content))
             {
                 response.EnsureSuccessStatusCode();
-                var transcript = (await response.Content.ReadFromJsonAsync<Transcript>());
+                var transcript = await response.Content.ReadFromJsonAsync<Transcript>();
                 if (transcript.Status == "error") throw new Exception(transcript.Error);
                 return transcript;
             }

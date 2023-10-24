@@ -1,15 +1,14 @@
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace AssemblyAI.SemanticKernel.Sample;
 
 public class FindFilePlugin
 {
-    public const string PluginName = "FindFilePlugin";
+    public const string PluginName = nameof(FindFilePlugin);
     private readonly IKernel _kernel;
+
 
     public FindFilePlugin(IKernel kernel)
     {
@@ -22,27 +21,22 @@ public class FindFilePlugin
                      $"on operating platform {Environment.OSVersion.Platform.ToString()} " +
                      $"with user profile path '{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}' is ";
         var context = await _kernel.InvokeSemanticFunctionAsync(
-            promptTemplate: prompt,
-            temperature: 0
+            template: prompt
         );
         var matches = Regex.Matches(
-            context.Result,
+            context.GetValue<string>()!,
             @"([a-zA-Z]?\:?[\/\\][\S-[""'\. ]]*[\/\\][\S-[""'\. ]]*)",
             RegexOptions.IgnoreCase
         );
         return matches.LastOrDefault()?.Value ?? null;
     }
 
-
-    public const string LocateFileFunctionName = nameof(LocateFile);
-
     [SKFunction, Description("Find files in common folders.")]
-    [SKParameter("fileName", "The name of the file")]
-    [SKParameter("commonFolderName", "The name of the common folder")]
-    public async Task<string> LocateFile(SKContext context)
+    public async Task<string> LocateFile(
+        [Description("The name of the file")] string fileName,
+        [Description("The name of the common folder")]
+        string? commonFolderName)
     {
-        var fileName = context.Variables["fileName"];
-        var commonFolderName = context.Variables["commonFolderName"];
         var commonFolderPath = commonFolderName?.ToLower() switch
         {
             null => Environment.CurrentDirectory,
