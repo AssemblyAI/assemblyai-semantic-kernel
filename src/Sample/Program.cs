@@ -13,8 +13,8 @@ internal class Program
 
         var kernel = BuildKernel(config);
 
-        //await TranscribeFileUsingPluginDirectly(kernel);
-        //await TranscribeFileUsingPluginFromSemanticFunction(kernel);
+        await TranscribeFileUsingPluginDirectly(kernel);
+        await TranscribeFileUsingPluginFromSemanticFunction(kernel);
         await TranscribeFileUsingPlan(kernel);
     }
 

@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>9bf031e1-85d9-44ec-bcc3-bcf25b26eeaa</UserSecretsId>
     <NoWarn>SKEXP0060</NoWarn>
+    <RootNamespace>AssemblyAI.SemanticKernel.Sample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
