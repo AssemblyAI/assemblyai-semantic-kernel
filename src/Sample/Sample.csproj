@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>9bf031e1-85d9-44ec-bcc3-bcf25b26eeaa</UserSecretsId>
-    <RootNamespace>AssemblyAI.SemanticKernel.Sample</RootNamespace>
+    <NoWarn>SKEXP0060</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +33,10 @@
       <Version>8.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.SemanticKernel">
-      <Version>1.0.0-beta8</Version>
+      <Version>1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars">
+      <Version>1.0.1-preview</Version>
     </PackageReference>
   </ItemGroup>
 </Project>

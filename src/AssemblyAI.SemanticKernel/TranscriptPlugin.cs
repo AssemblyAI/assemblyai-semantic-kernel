@@ -24,7 +24,7 @@ namespace AssemblyAI.SemanticKernel
 
         public const string TranscribeFunctionName = nameof(Transcribe);
 
-        [SKFunction, Description("Transcribe an audio or video file to text.")]
+        [KernelFunction, Description("Transcribe an audio or video file to text.")]
         public async Task<string> Transcribe(
             [Description("The public URL or the local path of the audio or video file to transcribe.")]
             string input

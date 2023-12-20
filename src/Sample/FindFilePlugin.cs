@@ -7,22 +7,13 @@ namespace AssemblyAI.SemanticKernel.Sample;
 public class FindFilePlugin
 {
     public const string PluginName = nameof(FindFilePlugin);
-    private readonly IKernel _kernel;
 
-
-    public FindFilePlugin(IKernel kernel)
-    {
-        _kernel = kernel;
-    }
-
-    private async Task<string?> GetCommonFolderPath(string commonFolderName)
+    private async Task<string?> GetCommonFolderPath(Kernel kernel, string commonFolderName)
     {
         var prompt = $"The path for the common folder '{commonFolderName}' " +
                      $"on operating platform {Environment.OSVersion.Platform.ToString()} " +
                      $"with user profile path '{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}' is ";
-        var context = await _kernel.InvokeSemanticFunctionAsync(
-            template: prompt
-        );
+        var context = await kernel.InvokePromptAsync(prompt);
         var matches = Regex.Matches(
             context.GetValue<string>()!,
             @"([a-zA-Z]?\:?[\/\\][\S-[""'\. ]]*[\/\\][\S-[""'\. ]]*)",
@@ -31,11 +22,12 @@ public class FindFilePlugin
         return matches.LastOrDefault()?.Value ?? null;
     }
 
-    [SKFunction, Description("Find files in common folders.")]
+    [KernelFunction, Description("Find files in common folders.")]
     public async Task<string> LocateFile(
         [Description("The name of the file")] string fileName,
         [Description("The name of the common folder")]
-        string? commonFolderName)
+        string? commonFolderName,
+        Kernel kernel)
     {
         var commonFolderPath = commonFolderName?.ToLower() switch
         {
@@ -48,7 +40,7 @@ public class FindFilePlugin
             "pictures" => Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
             "documents" => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "user" => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            _ => await GetCommonFolderPath(commonFolderName)
+            _ => await GetCommonFolderPath(kernel, commonFolderName)
                  ?? throw new Exception("Could not figure out the location of the common folder.")
         };
 
