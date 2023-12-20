@@ -40,4 +40,10 @@
       <Version>1.0.1-preview</Version>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

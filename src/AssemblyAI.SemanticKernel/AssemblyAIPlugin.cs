@@ -7,19 +7,42 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 
 namespace AssemblyAI.SemanticKernel
 {
-    public class TranscriptPlugin
+    public class AssemblyAIPlugin
     {
-        public const string PluginName = nameof(TranscriptPlugin);
-        private readonly string _apiKey;
-        public bool AllowFileSystemAccess { get; set; }
+        public const string PluginName = "AssemblyAI";
+        private readonly AssemblyAIPluginsOptions _options;
 
-        public TranscriptPlugin(string apiKey)
+        private string ApiKey => _options.ApiKey;
+
+        private bool AllowFileSystemAccess => _options.AllowFileSystemAccess;
+
+        public AssemblyAIPlugin(string apiKey)
         {
-            _apiKey = apiKey;
+            _options = new AssemblyAIPluginsOptions
+            {
+                ApiKey = apiKey
+            };
+        }
+
+        public AssemblyAIPlugin(string apiKey, bool allowFileSystemAccess)
+        {
+            _options = new AssemblyAIPluginsOptions
+            {
+                ApiKey = apiKey,
+                AllowFileSystemAccess = allowFileSystemAccess
+            };
+        }
+        
+        [ActivatorUtilitiesConstructor]
+        public AssemblyAIPlugin(IOptions<AssemblyAIPluginsOptions> options)
+        {
+            _options = options.Value;
         }
 
         public const string TranscribeFunctionName = nameof(Transcribe);
@@ -37,14 +60,14 @@ namespace AssemblyAI.SemanticKernel
 
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiKey);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(ApiKey);
                 string audioUrl;
                 if (TryGetPath(input, out var filePath))
                 {
                     if (AllowFileSystemAccess == false)
                     {
                         throw new Exception(
-                            "You need to allow file system access to upload files. Set TranscriptPlugin.AllowFileSystemAccess to true."
+                            "You need to allow file system access to upload files. Set AssemblyAI:AllowFileSystemAccess to true."
                         );
                     }
 
@@ -135,14 +158,5 @@ namespace AssemblyAI.SemanticKernel
                 }
             }
         }
-    }
-
-    public class Transcript
-    {
-        public string Id { get; set; } = null;
-        public string Status { get; set; } = null;
-        public string Text { get; set; }
-
-        public string Error { get; set; }
     }
 }

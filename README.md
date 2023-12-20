@@ -22,7 +22,7 @@ Add the [AssemblyAI.SemanticKernel NuGet package](https://www.nuget.org/packages
 dotnet add package AssemblyAI.SemanticKernel
 ```
 
-Next, register the `TranscriptPlugin` into your kernel:
+Next, register the `AssemblyAI` plugin into your kernel:
 
 ```csharp
 using AssemblyAI.SemanticKernel;
@@ -50,8 +50,8 @@ var arguments = new KernelArguments
     ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
 };
 var result = await kernel.InvokeAsync(
-    TranscriptPlugin.PluginName, 
-    TranscriptPlugin.TranscribeFunctionName, 
+    AssemblyAIPlugin.PluginName, 
+    AssemblyAIPlugin.TranscribeFunctionName, 
     arguments
 );
 Console.WriteLine(result.GetValue<string>());
@@ -60,7 +60,7 @@ Console.WriteLine(result.GetValue<string>());
 You can get the transcript using `result.GetValue<string>()`.
 
 You can also upload local audio and video file. To do this:
-- Set the `TranscriptPlugin.AllowFileSystemAccess` property to `true`.
+- Set the `AssemblyAI:AllowFileSystemAccess` configuration to `true`.
 - Configure the `INPUT` variable with a local file path.
 
 ```csharp
@@ -69,15 +69,15 @@ kernel.ImportPluginFromObject(
     {
         AllowFileSystemAccess = true
     },
-    TranscriptPlugin.PluginName
+    AssemblyAIPlugin.PluginName
 );
 var arguments = new KernelArguments
 {
     ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
 };
 var result = await kernel.InvokeAsync(
-    TranscriptPlugin.PluginName, 
-    TranscriptPlugin.TranscribeFunctionName, 
+    AssemblyAIPlugin.PluginName, 
+    AssemblyAIPlugin.TranscribeFunctionName, 
     arguments
 );
 Console.WriteLine(result.GetValue<string>());
@@ -88,7 +88,7 @@ You can also invoke the function from within a semantic function like this.
 ```csharp
 const string prompt = """
                       Here is a transcript:
-                      {{TranscriptPlugin.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
+                      {{AssemblyAI.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
                       ---
                       Summarize the transcript.
                       """;
