@@ -16,15 +16,16 @@ namespace AssemblyAI.SemanticKernel
     public class AssemblyAIPlugin
     {
         public const string PluginName = "AssemblyAI";
-        private readonly AssemblyAIPluginsOptions _options;
+        
+        internal AssemblyAIPluginsOptions Options { get; }
 
-        private string ApiKey => _options.ApiKey;
+        private string ApiKey => Options.ApiKey;
 
-        private bool AllowFileSystemAccess => _options.AllowFileSystemAccess;
+        private bool AllowFileSystemAccess => Options.AllowFileSystemAccess;
 
         public AssemblyAIPlugin(string apiKey)
         {
-            _options = new AssemblyAIPluginsOptions
+            Options = new AssemblyAIPluginsOptions
             {
                 ApiKey = apiKey
             };
@@ -32,7 +33,7 @@ namespace AssemblyAI.SemanticKernel
 
         public AssemblyAIPlugin(string apiKey, bool allowFileSystemAccess)
         {
-            _options = new AssemblyAIPluginsOptions
+            Options = new AssemblyAIPluginsOptions
             {
                 ApiKey = apiKey,
                 AllowFileSystemAccess = allowFileSystemAccess
@@ -42,7 +43,7 @@ namespace AssemblyAI.SemanticKernel
         [ActivatorUtilitiesConstructor]
         public AssemblyAIPlugin(IOptions<AssemblyAIPluginsOptions> options)
         {
-            _options = options.Value;
+            Options = options.Value;
         }
 
         public const string TranscribeFunctionName = nameof(Transcribe);
