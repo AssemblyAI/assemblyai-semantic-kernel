@@ -3,8 +3,14 @@ namespace AssemblyAI.SemanticKernel
     /// <summary>
     /// Options to configure the AssemblyAI plugin with.
     /// </summary>
-    public class AssemblyAIPluginsOptions
+    public class AssemblyAIPluginOptions
     {
+        /// <summary>
+        /// The name of the plugin registered into Semantic Kernel.
+        /// Defaults to "AssemblyAIPlugin".
+        /// </summary>
+        public string PluginName { get; set; }
+        
         /// <summary>
         /// The AssemblyAI API key. Find your API key at https://www.assemblyai.com/app/account
         /// </summary>

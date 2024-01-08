@@ -15,9 +15,7 @@ namespace AssemblyAI.SemanticKernel
 {
     public class AssemblyAIPlugin
     {
-        public const string PluginName = "AssemblyAI";
-        
-        internal AssemblyAIPluginsOptions Options { get; }
+        internal AssemblyAIPluginOptions Options { get; }
 
         private string ApiKey => Options.ApiKey;
 
@@ -25,7 +23,7 @@ namespace AssemblyAI.SemanticKernel
 
         public AssemblyAIPlugin(string apiKey)
         {
-            Options = new AssemblyAIPluginsOptions
+            Options = new AssemblyAIPluginOptions
             {
                 ApiKey = apiKey
             };
@@ -33,7 +31,7 @@ namespace AssemblyAI.SemanticKernel
 
         public AssemblyAIPlugin(string apiKey, bool allowFileSystemAccess)
         {
-            Options = new AssemblyAIPluginsOptions
+            Options = new AssemblyAIPluginOptions
             {
                 ApiKey = apiKey,
                 AllowFileSystemAccess = allowFileSystemAccess
@@ -41,7 +39,7 @@ namespace AssemblyAI.SemanticKernel
         }
         
         [ActivatorUtilitiesConstructor]
-        public AssemblyAIPlugin(IOptions<AssemblyAIPluginsOptions> options)
+        public AssemblyAIPlugin(IOptions<AssemblyAIPluginOptions> options)
         {
             Options = options.Value;
         }

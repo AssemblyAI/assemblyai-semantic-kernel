@@ -45,14 +45,13 @@ kernel.ImportPluginFromObject(
 
 Get the `Transcribe` function from the transcript plugin and invoke it with the context variables.
 ```csharp
-var arguments = new KernelArguments
-{
-    ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
-};
 var result = await kernel.InvokeAsync(
-    AssemblyAIPlugin.PluginName, 
+    nameof(AssemblyAIPlugin), 
     AssemblyAIPlugin.TranscribeFunctionName, 
-    arguments
+    new KernelArguments
+    {
+        ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+    }
 );
 Console.WriteLine(result.GetValue<string>());
 ```
@@ -68,17 +67,15 @@ kernel.ImportPluginFromObject(
     new TranscriptPlugin(apiKey: apiKey)
     {
         AllowFileSystemAccess = true
-    },
-    AssemblyAIPlugin.PluginName
+    }
 );
-var arguments = new KernelArguments
-{
-    ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
-};
 var result = await kernel.InvokeAsync(
-    AssemblyAIPlugin.PluginName, 
+    nameof(AssemblyAIPlugin), 
     AssemblyAIPlugin.TranscribeFunctionName, 
-    arguments
+    new KernelArguments
+    {
+        ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+    }
 );
 Console.WriteLine(result.GetValue<string>());
 ```
@@ -88,7 +85,7 @@ You can also invoke the function from within a semantic function like this.
 ```csharp
 const string prompt = """
                       Here is a transcript:
-                      {{AssemblyAI.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
+                      {{AssemblyAIPlugin.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
                       ---
                       Summarize the transcript.
                       """;

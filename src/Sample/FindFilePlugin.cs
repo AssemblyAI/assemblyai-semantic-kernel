@@ -6,8 +6,6 @@ namespace AssemblyAI.SemanticKernel.Sample;
 
 public class FindFilePlugin
 {
-    public const string PluginName = nameof(FindFilePlugin);
-
     private async Task<string?> GetCommonFolderPath(Kernel kernel, string commonFolderName)
     {
         var prompt = $"The path for the common folder '{commonFolderName}' " +
