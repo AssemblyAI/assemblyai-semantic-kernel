@@ -33,11 +33,10 @@ internal class Program
             new TranscriptPlugin(apiKey: apiKey)
             {
                 AllowFileSystemAccess = true
-            },
-            TranscriptPlugin.PluginName
+            }
         );
 
-        kernel.ImportPluginFromType<FindFilePlugin>(FindFilePlugin.PluginName);
+        kernel.ImportPluginFromType<FindFilePlugin>();
         return kernel;
     }
 
@@ -54,14 +53,13 @@ internal class Program
     private static async Task TranscribeFileUsingPluginDirectly(Kernel kernel)
     {
         Console.WriteLine("Transcribing file using plugin directly");
-        var arguments = new KernelArguments
-        {
-            ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
-        };
         var result = await kernel.InvokeAsync(
-            TranscriptPlugin.PluginName, 
-            TranscriptPlugin.TranscribeFunctionName, 
-            arguments
+            nameof(TranscriptPlugin),
+            TranscriptPlugin.TranscribeFunctionName,
+            new KernelArguments
+            {
+                ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+            }
         );
 
         Console.WriteLine(result.GetValue<string>());

@@ -37,7 +37,6 @@ string apiKey = Environment.GetEnvironmentVariable("ASSEMBLYAI_API_KEY")
 
 kernel.ImportPluginFromObject(
     new TranscriptPlugin(apiKey: apiKey)
-    TranscriptPlugin.PluginName
 );
 ```
 
@@ -45,14 +44,13 @@ kernel.ImportPluginFromObject(
 
 Get the `Transcribe` function from the transcript plugin and invoke it with the context variables.
 ```csharp
-var arguments = new KernelArguments
-{
-    ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
-};
 var result = await kernel.InvokeAsync(
-    TranscriptPlugin.PluginName, 
+    nameof(TranscriptPlugin), 
     TranscriptPlugin.TranscribeFunctionName, 
-    arguments
+    new KernelArguments
+    {
+        ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+    }
 );
 Console.WriteLine(result.GetValue<string>());
 ```
@@ -68,17 +66,15 @@ kernel.ImportPluginFromObject(
     new TranscriptPlugin(apiKey: apiKey)
     {
         AllowFileSystemAccess = true
-    },
-    TranscriptPlugin.PluginName
+    }
 );
-var arguments = new KernelArguments
-{
-    ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
-};
 var result = await kernel.InvokeAsync(
-    TranscriptPlugin.PluginName, 
+    nameof(TranscriptPlugin), 
     TranscriptPlugin.TranscribeFunctionName, 
-    arguments
+    new KernelArguments
+    {
+        ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+    }
 );
 Console.WriteLine(result.GetValue<string>());
 ```
