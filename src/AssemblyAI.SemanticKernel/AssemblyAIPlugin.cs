@@ -66,7 +66,7 @@ namespace AssemblyAI.SemanticKernel
                     if (AllowFileSystemAccess == false)
                     {
                         throw new Exception(
-                            "You need to allow file system access to upload files. Set AssemblyAI:AllowFileSystemAccess to true."
+                            "You need to allow file system access to upload files. Set AssemblyAI:Plugin:AllowFileSystemAccess to true."
                         );
                     }
 

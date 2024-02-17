@@ -59,7 +59,7 @@ Console.WriteLine(result.GetValue<string>());
 You can get the transcript using `result.GetValue<string>()`.
 
 You can also upload local audio and video file. To do this:
-- Set the `AssemblyAI:AllowFileSystemAccess` configuration to `true`.
+- Set the `AssemblyAI:Plugin:AllowFileSystemAccess` configuration to `true`.
 - Configure the `INPUT` variable with a local file path.
 
 ```csharp

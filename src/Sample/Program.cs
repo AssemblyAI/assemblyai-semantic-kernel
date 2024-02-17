@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Planning.Handlebars;
 
@@ -33,12 +32,11 @@ internal class Program
     private static Kernel BuildKernel(IConfiguration config)
     {
         var kernelBuilder = Kernel.CreateBuilder();
-        kernelBuilder.Services.AddSingleton(config);
         kernelBuilder.AddOpenAIChatCompletion(
                 "gpt-3.5-turbo",
                 config["OpenAI:ApiKey"] ?? throw new Exception("OpenAI:ApiKey configuration is required.")
             )
-            .AddAssemblyAIPlugin();
+            .AddAssemblyAIPlugin(config);
         var kernel = kernelBuilder.Build();
 
         kernel.ImportPluginFromType<FindFilePlugin>();

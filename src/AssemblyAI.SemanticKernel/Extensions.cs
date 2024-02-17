@@ -15,34 +15,6 @@ namespace AssemblyAI.SemanticKernel
         /// Configure the AssemblyAI plugins using the specified configuration section path.
         /// </summary>
         /// <param name="builder"></param>
-        /// <returns></returns>
-        public static IKernelBuilder AddAssemblyAIPlugin(
-            this IKernelBuilder builder
-        ) => AddAssemblyAIPlugin(builder, "AssemblyAI");
-
-        /// <summary>
-        /// Configure the AssemblyAI plugins using the specified configuration section path.
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="configSectionPath">The path of the configuration section to bind options to</param>
-        /// <returns></returns>
-        public static IKernelBuilder AddAssemblyAIPlugin(
-            this IKernelBuilder builder,
-            string configSectionPath
-        )
-        {
-            var services = builder.Services;
-            var optionsBuilder = services.AddOptions<AssemblyAIPluginOptions>();
-            optionsBuilder.BindConfiguration(configSectionPath);
-            ValidateOptions(optionsBuilder);
-            AddPlugin(builder);
-            return builder;
-        }
-
-        /// <summary>
-        /// Configure the AssemblyAI plugins using the specified configuration section path.
-        /// </summary>
-        /// <param name="builder"></param>
         /// <param name="configuration">The configuration to bind options to</param>
         /// <returns></returns>
         public static IKernelBuilder AddAssemblyAIPlugin(
@@ -50,6 +22,13 @@ namespace AssemblyAI.SemanticKernel
             IConfiguration configuration
         )
         {
+            var pluginConfigurationSection = configuration.GetSection("AssemblyAI:Plugin");
+            // if configuration exists at section, use that config, otherwise using section that was passed in.
+            if (pluginConfigurationSection.Exists())
+            {
+                configuration = pluginConfigurationSection;
+            }
+            
             var services = builder.Services;
             var optionsBuilder = services.AddOptions<AssemblyAIPluginOptions>();
             optionsBuilder.Bind(configuration);
@@ -123,7 +102,7 @@ namespace AssemblyAI.SemanticKernel
         {
             optionsBuilder.Validate(
                 options => !string.IsNullOrEmpty(options.ApiKey),
-                "AssemblyAI:ApiKey must be configured."
+                "AssemblyAI:Plugin:ApiKey must be configured."
             );
         }
 
