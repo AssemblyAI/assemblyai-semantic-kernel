@@ -1,49 +1,55 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>AssemblyAI.SemanticKernel</RootNamespace>
-    <AssemblyName>AssemblyAI.SemanticKernel</AssemblyName>
-    <PackageId>AssemblyAI.SemanticKernel</PackageId>
-    <Title>AssemblyAI plugins for Semantic Kernel</Title>
-    <Authors>AssemblyAI</Authors>
-    <Description>Transcribe audio using AssemblyAI with Semantic Kernel plugins</Description>
-    <Copyright>Copyright 2023 (c) AssemblyAI, Inc. All rights reserved.</Copyright>
-    <PackageTags>SemanticKernel;AI;AssemblyAI;transcript</PackageTags>
-    <Company>AssemblyAI</Company>
-    <Product>AssemblyAI</Product>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <PackageVersion>1.0.3</PackageVersion>
-    <OutputType>Library</OutputType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel.git</RepositoryUrl>
-    <PackageIconUrl>https://www.assemblyai.com/favicon.png</PackageIconUrl>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(CI)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SemanticKernel">
-      <Version>1.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Net.Http.Json">
-      <Version>8.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>AssemblyAI.SemanticKernel</RootNamespace>
+        <AssemblyName>AssemblyAI.SemanticKernel</AssemblyName>
+        <PackageId>AssemblyAI.SemanticKernel</PackageId>
+        <Title>AssemblyAI plugins for Semantic Kernel</Title>
+        <Authors>AssemblyAI</Authors>
+        <Description>Transcribe audio using AssemblyAI with Semantic Kernel plugins</Description>
+        <Copyright>Copyright 2023 (c) AssemblyAI, Inc. All rights reserved.</Copyright>
+        <PackageTags>SemanticKernel;AI;AssemblyAI;transcript</PackageTags>
+        <Company>AssemblyAI</Company>
+        <Product>AssemblyAI</Product>
+        <AssemblyVersion>1.0.3.0</AssemblyVersion>
+        <FileVersion>1.0.3.0</FileVersion>
+        <PackageVersion>1.0.3</PackageVersion>
+        <OutputType>Library</OutputType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel.git</RepositoryUrl>
+        <PackageIconUrl>https://www.assemblyai.com/favicon.png</PackageIconUrl>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <RepositoryType>git</RepositoryType>
+        <NoWarn>SKEXP0005</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(CI)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SemanticKernel">
+            <Version>1.4.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Net.Http.Json">
+            <Version>8.0.0</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="..\..\icon.png" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="AssemblyAI">
+            <HintPath>..\..\..\assemblyai-csharp-sdk\src\AssemblyAI\bin\Debug\netstandard2.0\AssemblyAI.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>
