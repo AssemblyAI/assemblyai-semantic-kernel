@@ -11,9 +11,9 @@
     <PackageTags>SemanticKernel;AI;AssemblyAI;transcript</PackageTags>
     <Company>AssemblyAI</Company>
     <Product>AssemblyAI</Product>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <PackageVersion>1.0.3</PackageVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <PackageVersion>1.1.0</PackageVersion>
     <OutputType>Library</OutputType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/AssemblyAI/assemblyai-semantic-kernel</PackageProjectUrl>
@@ -31,6 +31,12 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions">
+      <Version>8.0.0</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.SemanticKernel">
       <Version>1.0.1</Version>
     </PackageReference>

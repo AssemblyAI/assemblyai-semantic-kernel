@@ -22,7 +22,7 @@ Add the [AssemblyAI.SemanticKernel NuGet package](https://www.nuget.org/packages
 dotnet add package AssemblyAI.SemanticKernel
 ```
 
-Next, register the `TranscriptPlugin` into your kernel:
+Next, register the `AssemblyAI` plugin into your kernel:
 
 ```csharp
 using AssemblyAI.SemanticKernel;
@@ -37,6 +37,7 @@ string apiKey = Environment.GetEnvironmentVariable("ASSEMBLYAI_API_KEY")
 
 kernel.ImportPluginFromObject(
     new TranscriptPlugin(apiKey: apiKey)
+    TranscriptPlugin.PluginName
 );
 ```
 
@@ -45,8 +46,8 @@ kernel.ImportPluginFromObject(
 Get the `Transcribe` function from the transcript plugin and invoke it with the context variables.
 ```csharp
 var result = await kernel.InvokeAsync(
-    nameof(TranscriptPlugin), 
-    TranscriptPlugin.TranscribeFunctionName, 
+    nameof(AssemblyAIPlugin), 
+    AssemblyAIPlugin.TranscribeFunctionName, 
     new KernelArguments
     {
         ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
@@ -58,7 +59,7 @@ Console.WriteLine(result.GetValue<string>());
 You can get the transcript using `result.GetValue<string>()`.
 
 You can also upload local audio and video file. To do this:
-- Set the `TranscriptPlugin.AllowFileSystemAccess` property to `true`.
+- Set the `AssemblyAI:Plugin:AllowFileSystemAccess` configuration to `true`.
 - Configure the `INPUT` variable with a local file path.
 
 ```csharp
@@ -69,8 +70,8 @@ kernel.ImportPluginFromObject(
     }
 );
 var result = await kernel.InvokeAsync(
-    nameof(TranscriptPlugin), 
-    TranscriptPlugin.TranscribeFunctionName, 
+    nameof(AssemblyAIPlugin), 
+    AssemblyAIPlugin.TranscribeFunctionName, 
     new KernelArguments
     {
         ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
@@ -84,7 +85,7 @@ You can also invoke the function from within a semantic function like this.
 ```csharp
 const string prompt = """
                       Here is a transcript:
-                      {{TranscriptPlugin.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
+                      {{AssemblyAIPlugin.Transcribe "https://storage.googleapis.com/aai-docs-samples/espn.m4a"}}
                       ---
                       Summarize the transcript.
                       """;
