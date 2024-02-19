@@ -86,7 +86,7 @@ var result = await kernel.InvokeAsync<string>(
     AssemblyAIPlugin.TranscribeFunctionName, 
     new KernelArguments
     {
-        ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
+        ["INPUT"] = "./espn.m4a"
     }
 );
 Console.WriteLine(result);
