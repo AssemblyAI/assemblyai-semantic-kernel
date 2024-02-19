@@ -46,7 +46,7 @@ internal class Program
     private static async Task TranscribeFileUsingPluginDirectly(Kernel kernel)
     {
         Console.WriteLine("Transcribing file using plugin directly");
-        var result = await kernel.InvokeAsync(
+        var result = await kernel.InvokeAsync<string>(
             nameof(AssemblyAIPlugin),
             AssemblyAIPlugin.TranscribeFunctionName,
             new KernelArguments
@@ -55,7 +55,7 @@ internal class Program
             }
         );
 
-        Console.WriteLine(result.GetValue<string>());
+        Console.WriteLine(result);
         Console.WriteLine();
     }
 
@@ -70,20 +70,21 @@ internal class Program
                               ---
                               Summarize the transcript.
                               """;
-        var result = await kernel.InvokePromptAsync(prompt);
-        Console.WriteLine(result.GetValue<string>());
+        var result = await kernel.InvokePromptAsync<string>(prompt);
+        Console.WriteLine(result);
         Console.WriteLine();
     }
 
     private static async Task TranscribeFileUsingPlan(Kernel kernel)
     {
+        var jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
         Console.WriteLine("Transcribing file from a plan");
         var planner = new HandlebarsPlanner(new HandlebarsPlannerOptions { AllowLoops = true });
         const string prompt = "Find the espn.m4a in my downloads folder and transcribe it.";
         var plan = await planner.CreatePlanAsync(kernel, prompt);
 
         Console.WriteLine("Plan:\n");
-        Console.WriteLine(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+        Console.WriteLine(JsonSerializer.Serialize(plan, jsonSerializerOptions));
 
         var transcript = await plan.InvokeAsync(kernel);
         Console.WriteLine(transcript);

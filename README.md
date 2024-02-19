@@ -29,47 +29,59 @@ using AssemblyAI.SemanticKernel;
 using Microsoft.SemanticKernel;
 
 // Build your kernel
-var kernel = Kernel.CreateBuilder();
+var kernelBuilder = Kernel.CreateBuilder();
+
+// add services like LLMs etc.
 
 // Get AssemblyAI API key from env variables, or much better, from .NET configuration
 string apiKey = Environment.GetEnvironmentVariable("ASSEMBLYAI_API_KEY")
   ?? throw new Exception("ASSEMBLYAI_API_KEY env variable not configured.");
+kernelBuilder.AddAssemblyAIPlugin(new AssemblyAIPluginOptions
+    {
+        ApiKey = apiKey,
+        PluginName = null,
+        AllowFileSystemAccess = false
+    });
 
-kernel.ImportPluginFromObject(
-    new TranscriptPlugin(apiKey: apiKey)
-    TranscriptPlugin.PluginName
-);
+var kernel = kernelBuilder.Build();
 ```
+
+You can configure three options:
+- ApiKey: Configure the AssemblyAI API key
+- PluginName: Configure the name of the plugin inside of Semantic Kernel. Defaults to `"AssemblyAIPlugin"`.
+- AllowFileSystemAccess: Allow the plugin to read files from the file system to upload audio files for transcriptions. Defaults to `false`.
+
+`kernelBuilder.AddAssemblyAIPlugin` has overloads to configure the plugin using configuration and through a lambda.
 
 ## Usage
 
 Get the `Transcribe` function from the transcript plugin and invoke it with the context variables.
 ```csharp
-var result = await kernel.InvokeAsync(
-    nameof(AssemblyAIPlugin), 
-    AssemblyAIPlugin.TranscribeFunctionName, 
+var result = await kernel.InvokeAsync<string>(
+    nameof(AssemblyAIPlugin),
+    AssemblyAIPlugin.TranscribeFunctionName,
     new KernelArguments
     {
         ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
     }
 );
-Console.WriteLine(result.GetValue<string>());
+Console.WriteLine(result);
 ```
 
-You can get the transcript using `result.GetValue<string>()`.
-
 You can also upload local audio and video file. To do this:
-- Set the `AssemblyAI:Plugin:AllowFileSystemAccess` configuration to `true`.
+- Set the `AssemblyAIPluginOptions.AllowFileSystemAccess` to `true`.
 - Configure the `INPUT` variable with a local file path.
 
 ```csharp
-kernel.ImportPluginFromObject(
-    new TranscriptPlugin(apiKey: apiKey)
+kernelBuilder.AddAssemblyAIPlugin(new AssemblyAIPluginOptions
     {
+        ApiKey = apiKey,
         AllowFileSystemAccess = true
-    }
-);
-var result = await kernel.InvokeAsync(
+    });
+
+...
+
+var result = await kernel.InvokeAsync<string>(
     nameof(AssemblyAIPlugin), 
     AssemblyAIPlugin.TranscribeFunctionName, 
     new KernelArguments
@@ -77,7 +89,7 @@ var result = await kernel.InvokeAsync(
         ["INPUT"] = "https://storage.googleapis.com/aai-docs-samples/espn.m4a"
     }
 );
-Console.WriteLine(result.GetValue<string>());
+Console.WriteLine(result);
 ```
 
 You can also invoke the function from within a semantic function like this.
@@ -89,12 +101,12 @@ const string prompt = """
                       ---
                       Summarize the transcript.
                       """;
-var result = await kernel.InvokePromptAsync(prompt);
-Console.WriteLine(result.GetValue<string>());
+var result = await kernel.InvokePromptAsync<string>(prompt);
+Console.WriteLine(result);
 ```
 
 All the code above explicitly invokes the transcript plugin, but it can also be invoked as part of a plan. 
-Check out [the Sample project](./src/Sample/Program.cs#L87)) which uses a plan to transcribe an audio file in addition to explicit invocation.
+Check out [the Sample project](./src/Sample/Program.cs#L78)) which uses a plan to transcribe an audio file in addition to explicit invocation.
 
 ## Notes
 
