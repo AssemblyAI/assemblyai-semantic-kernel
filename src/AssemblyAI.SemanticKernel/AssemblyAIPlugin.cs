@@ -37,7 +37,7 @@ namespace AssemblyAI.SemanticKernel
                 AllowFileSystemAccess = allowFileSystemAccess
             };
         }
-        
+
         [ActivatorUtilitiesConstructor]
         public AssemblyAIPlugin(IOptions<AssemblyAIPluginOptions> options)
         {
@@ -60,6 +60,11 @@ namespace AssemblyAI.SemanticKernel
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(ApiKey);
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AssemblyAI", "1.0"));
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(
+                    $"(integration=AssemblyAI.SemanticKernel/{typeof(AssemblyAIPlugin).Assembly.GetName().Version})"
+                ));
+
                 string audioUrl;
                 if (TryGetPath(input, out var filePath))
                 {
