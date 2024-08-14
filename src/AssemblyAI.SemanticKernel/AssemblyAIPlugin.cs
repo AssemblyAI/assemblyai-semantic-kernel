@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using AssemblyAI.Transcripts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -59,12 +60,19 @@ namespace AssemblyAI.SemanticKernel
 
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(ApiKey);
-                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AssemblyAI", "1.0"));
-                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(
-                    $"(integration=AssemblyAI.SemanticKernel/{typeof(AssemblyAIPlugin).Assembly.GetName().Version})"
-                ));
-
+                var client = new AssemblyAIClient(new ClientOptions
+                {
+                    ApiKey = ApiKey,
+                    HttpClient = httpClient,
+                    UserAgent = new UserAgent
+                    {
+                        ["integration"] = new UserAgentItem(
+                            "AssemblyAI.SemanticKernel", 
+                            typeof(AssemblyAIPlugin).Assembly.GetName().Version.ToString()
+                        )
+                    }
+                });
+                
                 string audioUrl;
                 if (TryGetPath(input, out var filePath))
                 {
@@ -75,15 +83,14 @@ namespace AssemblyAI.SemanticKernel
                         );
                     }
 
-                    audioUrl = await UploadFileAsync(filePath, httpClient);
+                    audioUrl = await UploadFileAsync(filePath, client);
                 }
                 else
                 {
                     audioUrl = input;
                 }
 
-                var transcript = await CreateTranscriptAsync(audioUrl, httpClient);
-                transcript = await WaitForTranscriptToProcess(transcript, httpClient);
+                var transcript = await TranscribeAsync(audioUrl, client);
                 return transcript.Text ?? throw new Exception("Transcript text is null. This should not happen.");
             }
         }
@@ -106,61 +113,25 @@ namespace AssemblyAI.SemanticKernel
             return true;
         }
 
-        private static async Task<string> UploadFileAsync(string path, HttpClient httpClient)
+        private static async Task<string> UploadFileAsync(string path, AssemblyAIClient client)
         {
             using (var fileStream = File.OpenRead(path))
-            using (var fileContent = new StreamContent(fileStream))
             {
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                using (var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/upload", fileContent))
-                {
-                    response.EnsureSuccessStatusCode();
-                    var jsonDoc = await response.Content.ReadFromJsonAsync<JsonDocument>();
-                    return jsonDoc?.RootElement.GetProperty("upload_url").GetString();
-                }
+                var response = await client.Files.UploadAsync(fileStream).ConfigureAwait(false);
+                return response.UploadUrl;
             }
         }
 
-        private static async Task<Transcript> CreateTranscriptAsync(string audioUrl, HttpClient httpClient)
+        private static async Task<Transcript> TranscribeAsync(string audioUrl, AssemblyAIClient client)
         {
-            var jsonString = JsonSerializer.Serialize(new
+            var transcriptParams = new TranscriptParams
             {
-                audio_url = audioUrl
-            });
+                AudioUrl = audioUrl
+            };
 
-            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            using (var response = await httpClient.PostAsync("https://api.assemblyai.com/v2/transcript", content))
-            {
-                response.EnsureSuccessStatusCode();
-                var transcript = await response.Content.ReadFromJsonAsync<Transcript>();
-                if (transcript.Status == "error") throw new Exception(transcript.Error);
-                return transcript;
-            }
-        }
-
-        private static async Task<Transcript> WaitForTranscriptToProcess(Transcript transcript, HttpClient httpClient)
-        {
-            var pollingEndpoint = $"https://api.assemblyai.com/v2/transcript/{transcript.Id}";
-
-            while (true)
-            {
-                var pollingResponse = await httpClient.GetAsync(pollingEndpoint);
-                pollingResponse.EnsureSuccessStatusCode();
-                transcript = (await pollingResponse.Content.ReadFromJsonAsync<Transcript>());
-                switch (transcript.Status)
-                {
-                    case "processing":
-                    case "queued":
-                        await Task.Delay(TimeSpan.FromSeconds(3));
-                        break;
-                    case "completed":
-                        return transcript;
-                    case "error":
-                        throw new Exception(transcript.Error);
-                    default:
-                        throw new Exception("This code shouldn't be reachable.");
-                }
-            }
-        }
+            var transcript = await client.Transcripts.TranscribeAsync(transcriptParams).ConfigureAwait(false);
+            transcript.EnsureStatusCompleted();
+            return transcript;
+        } 
     }
 }
