@@ -53,6 +53,7 @@ namespace AssemblyAI.SemanticKernel
             optionsBuilder.Configure(optionsToConfigure =>
             {
                 optionsToConfigure.ApiKey = options.ApiKey;
+                optionsToConfigure.PluginName = options.PluginName;
                 optionsToConfigure.AllowFileSystemAccess = options.AllowFileSystemAccess;
             });
             ValidateOptions(optionsBuilder);
